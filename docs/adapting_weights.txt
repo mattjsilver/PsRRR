@@ -1,0 +1,185 @@
+PATHWAYS SPARSE REDUCED-RANK REGRESSION
+
+Distributed under GNU general public licence (see COPYRIGHT.txt) 
+Copyright (C) 2012 Matt Silver
+
+WARRANTY DISCLAIMER
+Please note there is no warranty for the program, to the extent permitted by applicable law.
+Except when otherwise stated in writing the copyright holders and/or other parties provide the program
+"as is" without warranty of any kind, either expressed or implied, including, but not limited to, 
+the implied warranties of merchantability and fitness for a particular purpose. The entire risk
+as to the quality and performance of the program is with you. Should the program
+prove defective, you assume the cost of all necessary servicing, repair or correction.
+
+Please send comments or bugs to g.montana@imperial.ac.uk
+
+If you use PsRRR in a published paper, please cite at least one of the following 2 papers:
+
+PATHWAYS ANALYSIS WITH UNIVARIATE Y
+Silver, Matt, and Montana, G. “Fast Identification of Biological Pathways Associated with
+a Quantitative Trait Using Group Lasso with Overlaps.” 
+Statistical Applications in Genetics and Molecular Biology 11, no. 1 (2012).
+
+PATHWAYS ANALYSIS WITH MULTIVARIATE Y
+Silver, Matt, Eva Janousova, Xue Hua, Paul M. Thompson, and Giovanni Montana. 
+“Identification of Gene Pathways Implicated in Alzheimer’s Disease Using Longitudinal 
+Imaging Phenotypes with Sparse Regression.” 
+NeuroImage 63, no. 3 (2012)
+******************************************************************************************
+
+
+PROCEDURE FOR ADAPTING WEIGHTS
+
+** Note this weight adaptation stage is considered essential to remove potential biases, for 
+example arising from variations in gene number, LD etc in different pathways **
+
+See
+
+Silver, Matt, and Montana, G. “Fast Identification of Biological Pathways Associated with
+a Quantitative Trait Using Group Lasso with Overlaps.” Statistical Applications in
+Genetics and Molecular Biology 11, no. 1 (2012).
+
+for a detailed explanation of how the weight tuning process works.
+
+
+
+1. REQUIRED SOURCE FILES
+
+i. genotype and pathway mapping files (output from mapSNPsToPathway.py see docs/pathway_mapping.txt)
+
+ii. phenotype file - white space delimited text file containing phenotype information (see
+data/sample.pheno for example).  This is an (N x Q) array of floats where N is sample size
+and Q is number of phenotypes.  (Q=1 for univariate phenotype).  Optionally, first column can be 
+subject IDs.
+
+
+
+2. RUNNING THE CODE
+
+i. ensure that the program directory structure is as described in README.txt
+
+ii. the program requires a parameter file containing file locations, program parameters
+etc.  This must be located in the params directory.  The name of the params file must be
+passed as an argument to program.  E.g. to adapt weights using the test data
+provided (AFTER MAPPING SNPS TO PATHWAYS!), do the following:
+
+	a. cd to the src/PsRRR/ directory
+	b. type the following command at the prompt
+		
+		~/src/PsRRR> python adaptWeights.py PsRRR_params_test
+
+To use your own data, amend the parameter file accordingly, and save it to a different name.
+Then run the program with the new param file name as the sole argument.
+
+
+
+3. OUTPUT FILES with test data provided (should be found in ~/sample_output/adaptWeights/
+after running adaptWeights.py as directed above).
+
+sample_weights_iterationX.pickle				- pathway weights at iteration X
+												  (calculated using pathway selection
+												  frequencies observed at iteration X-1)
+
+selFreqs_sample_weights_iterationX_all.pickle	- empirical pathway selection frequencies 
+												  using sample_weights_iterationX.pickle
+
+~/sample_output/plots/							- plots of selection frequency distributions
+												  at each iteration
+												  
+
+												  
+4. HINTS AND TIPS FOR WEIGHT TUNING
+
+Successful weight tuning depends on the values of a number of key parameters in the params 
+file.  These are detailed below, with some brief guidance on best practice.  Note that most 
+of the parameters in the params file aren't used in the weight tuning process.
+
+Refer to the sample params file (PsRRR_params_test.py)....
+
+# FILE LOCATIONS
+see comments in params file
+
+# REGULARISATION
+self.bPenalty			- specify same penalty to be used in full PsRRR analysis (e.g. 'GL' or 'SGL')
+						  note that pathway weight tuning is only required when applying a group penalty
+						  to the genotype vector (i.e. not required with lasso!)
+self.Lambda				- ignored in weight tuning (lambda varies to ensure single pathway is selected)
+self.alpha				- used when bPenalty = 'SGL' only; should be set to same value as used in PsRRR analysis
+
+# PATHWAYS SPARSE REDUCED RANK REGRESSION
+self.PsRRRconvergenceThresh,self.max_PsRRR_iterations 	- leave at default values
+self.B 					- ignored (no subsampling during weight tuning)
+
+# WEIGHT TUNING
+self.R 					- list (vector) of number of model fits to run at each weight tuning iteration.
+						  Weight are tuned a total of n = len(self.R) times, with self.R[z] model
+						  fits at iteration z.  Under the null we expect a 'smooth' pathway
+						  selection frequency distribution, so R[z] should be set with this in mind.  E.g.
+						  for L pathways, we run at least 10 * L model fits.  However, for the first few 
+						  iterations we expect pathway selection to be very biased (i.e. a relatively 
+						  small number of pathways will be selected with high frequency), so in the interests 
+						  of computational efficiency it makes sense to begin with fewer model fits, 
+						  and gradually increase.  For example, with 186 pathways, we have used the following:
+						  self.R = [2000,2000,2000,2000,2000,2000,2000,2000,2000,2000,
+						  			 4000,4000,4000,4000,4000,4000,4000,4000,4000,4000]
+self.firstIteration		- which iteration to start the weight tuning process at.  This is provided for
+						  convenience, since we may wish to stop and start the weight tuning process
+						  at some points to alter parameters etc.
+						  To begin with, this should set to 0, which initialises the weights to
+						  sqrt(S_l), l = 1, ..., L at the start of the weight tuning process.
+self.eta				- maximum proportionate weight decrease to be used at each iteration (see paper
+						  ref'd above).  By the same argument as above, this should be decreased as 
+						  bias is reduced and the weights become better tuned.  We have used the 
+						  following:
+						  self.eta = [0.95,0.95,0.95,0.95,0.975,0.975,0.975,0.975,0.99,0.99,
+						  				0.99,0.99,0.995,0.995,0.995,0.995,0.999,0.999,0.999,0.999]
+						  [Note that for pathways with zero selection frequency over the past
+						  3 weight tuning iterations, a value of eta=0.95 is automatically applied.]
+
+We have found this weight tuning algorithm to be a reliable means of reducing pathway selection
+bias, relatively insensitive to the particular parameter values used.  However, this is a 
+heuristic process, and the 'optimum' values for weight tuning will depend on the data 
+(genotypes, pathways, phenotypes).  For this reason, weight tuning should be guided by
+evidence of bias reduction, for example by observing the reduction in KL divergence, D; 
+the number of pathways with zero selection frequency; and the overall shape of the 
+selection frequency distribution.  This is best done by observing the actual selection frequency
+distributions at each iteration, located in the ~/sample_output/plots/ directory.
+
+# OPERATION MODE
+self.mode				- set to 'std' for operation on a single workstation;
+						  'pp' for use on a computing cluster (see below)
+
+# MISC
+self.verbose			- set to 'True' for verbose output
+						  Note - 'very' verbose output can be obtained by setting the following
+						  flags to 'True' in GL.glBCD() or SGL.CGD():
+						  showCDconvergence  - for CD within blocks
+						  showBCDconvergence - for BCD between blocks
+						  
+
+5. PARALLEL OPERATION ON A COMPUTING CLUSTER
+A very large reduction in execution time can be achieved by running the weight tuning algorithm
+across a multi-node computing cluster.  
+
+Parallel operation is currently implemented using parallel python (pp).  Please see the 
+parallel python website for further details: http://www.parallelpython.com/.
+
+PP operation works by distributing the model fits at each iteration across multiple CPUs ('workers') 
+located on multiple servers, controlled from a single client node.  For example, for a 
+computing cluster with one client, and 8 servers, each with 5 available CPUs, 1000 model fits
+will be distributed in parallel, so that each CPU performs 25 model fits.
+
+pp is configured in the params file as follows:
+
+self.ppServers			- tuple of server names, e.g.
+						  ("server1","server2",...,"serverN")
+self.ppPort				- port for communication between client and servers
+						  The remote servers should then be reachable from the client.  Test using:
+						  ssh -p $ppPort $serverName hostname
+self.workersPerServer   - number of available CPUs on each server
+self.nLocalCpus			- number of CPUs to use on client.  Usually set to zero.
+						  This can be used for testing pp operation on a single workstation.
+						  
+
+Alternatively, it should be relatively easy to set up parallel operation using some other 
+strategy, e.g. using SGE, since all model fits are independent.

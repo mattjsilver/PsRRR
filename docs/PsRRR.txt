@@ -1,0 +1,172 @@
+PATHWAYS SPARSE REDUCED-RANK REGRESSION
+
+Distributed under GNU general public licence (see COPYRIGHT.txt) 
+Copyright (C) 2012 Matt Silver
+
+WARRANTY DISCLAIMER
+Please note there is no warranty for the program, to the extent permitted by applicable law.
+Except when otherwise stated in writing the copyright holders and/or other parties provide the program
+"as is" without warranty of any kind, either expressed or implied, including, but not limited to, 
+the implied warranties of merchantability and fitness for a particular purpose. The entire risk
+as to the quality and performance of the program is with you. Should the program
+prove defective, you assume the cost of all necessary servicing, repair or correction.
+
+Please send comments or bugs to g.montana@imperial.ac.uk
+
+If you use PsRRR in a published paper, please cite at least one of the following 2 papers:
+
+PATHWAYS ANALYSIS WITH UNIVARIATE Y
+Silver, Matt, and Montana, G. “Fast Identification of Biological Pathways Associated with
+a Quantitative Trait Using Group Lasso with Overlaps.” 
+Statistical Applications in Genetics and Molecular Biology 11, no. 1 (2012).
+
+PATHWAYS ANALYSIS WITH MULTIVARIATE Y
+Silver, Matt, Eva Janousova, Xue Hua, Paul M. Thompson, and Giovanni Montana. 
+“Identification of Gene Pathways Implicated in Alzheimer’s Disease Using Longitudinal 
+Imaging Phenotypes with Sparse Regression.” 
+NeuroImage 63, no. 3 (2012)
+******************************************************************************************
+
+
+RUNNING PsRRR
+
+This document describes how to run a full PsRRR analysis.  We assume that SNPs have already
+been mapped to pathways (see docs/pathway_mapping.txt), and that weights have been tuned (see
+docs/adapting_weights.txt).
+
+
+1. REQUIRED SOURCE FILES
+
+i. genotype and pathway mapping files (output from mapSNPsToPathway.py see docs/pathway_mapping.txt)
+
+ii. tuned pathway weights file
+
+iii. phenotype file - white space delimited text file containing phenotype information (see
+data/sample.pheno for example).  This is an (N x Q) array of floats where N is sample size
+and Q is number of phenotypes.  (Q=1 for univariate phenotype).  Optionally, first column can be 
+subject IDs.
+
+
+2. RUNNING THE CODE
+
+i. ensure that the program directory structure is as described in README.txt
+
+ii. the program requires a parameter file containing file locations, program parameters
+etc.  This must be located in the params directory.  The name of the params file must be
+passed as an argument to program.  E.g. to run a full PsRRR analysis using the test data
+provided (AFTER MAPPING SNPS TO PATHWAYS AND TUNING WEIGHTS!), do the following:
+
+	a. cd to the src/PsRRR/ directory
+	b. type the following command at the prompt
+		
+		~/src/PsRRR> python runPsRRR.py PsRRR_params_test
+
+To use your own data, amend the parameter file accordingly, and save it to a different name.
+Then run the program with the new param file name as the sole argument.
+
+
+
+3. EXAMPLE OUTPUT FILES WITH TEST DATA PROVIDED (should be found in ~/sample_output/results/
+after running runPsRRR.py as directed above).
+
+bPenalty = 'GL':
+GL_22_Aug_2012_16_36_pathway_results.txt	- text file containing selected pathways at each 
+												subsample.  Each row contains a list of indices
+												corresponding to selected pathways at a single
+												subsample.  The number of pathways selected 
+												at each subsample will vary, but will broadly 
+												depend on the value of the regularisation
+												parameter, lambda (see params file), such 
+												that as lambda is reduced from 1, more pathways 
+												will be selected at each subsample.
+												
+bPenalty = 'SGL:
+SGL_22_Aug_2012_16_36_pathway_results.txt	- as above
+SGL_22_Aug_2012_16_36_snp_results.txt		- as above, but with indices corresponding to selected
+											  SNPs at each subsample.  The number of SNPs selected 
+											  at each subsample will vary, but will broadly 
+											  depend on the regularisation parameter, alpha, 
+											  such that as alpha is reduced from 1, more SNPs will
+											  be selected at each subsample.
+
+
+4. PROCESSING RESULTS
+
+Two basic scripts to process results files are provided.  With the sample data, they are 
+run with the following commands.
+
+i. For processing results file with bPenalty - 'GL'.  This produces list of pathways, 
+ranked by selection frequency across subsamples.
+
+~/src/PsRRR> python processGLresults.py PsRRR_params_test	
+
+ii. For processing results file with bPenalty - 'SGL'.  This produces lists of pathways, 
+SNPs, and genes to which selected SNPs map, all eanked by selection frequency across subsamples.
+																
+~/src/PsRRR> python processSGLresults.py PsRRR_params_test
+
+
+
+5. HINTS AND TIPS FOR RUNNING PsRRR
+
+Most of the parameters for running PsRRR are described in the params file (see 
+params/PsRRR_params_test.py).  A few additional comments are provided below...
+
+# FILE LOCATIONS
+self.WEIGHTS_FILE		- the rootname of the weights file to be used.  
+self.weights_iteration 	- the weights iteration to be used for analysis
+
+At the end of weight tuning, the user must choose an optimum set of weights to be used in 
+the full analysis (see docs/adapting_weights.txt). So if the optimum weights iteration is 5,
+with corresponding weights file sample_weights_iteration4.pickle, then 
+self.WEIGHTS_FILE 		= 'sample_weights' and
+self.weights_iteration 	= 5
+The full analysis can be run without weight tuning, but seeting weights_iteration = 0, but
+this isn't recommended, as the results will be biased.
+
+# REGULARISATION
+self.bPenalty:
+For pathway ranking only, the preferred option is 'GL' (group lasso) to enforce group (pathway)
+sparsity in the genotype coefficient vector.  With this option, only self.Lambda - the 
+group sparsity regularisation parameter is used.  For an additional level of SNP sparsity, 
+self.bPenalty = 'SGL' (sparse group lasso), can be used.  (See e.g. 
+Noah, Friedman, Hastie, and Tibshirani. “A Sparse-group Lasso.”
+Journal of Computational and Graphical Statistics In press (2012): 1–13).
+This requires the setting of an additional sparsity parameter, self.alpha, which controls
+the degree of SNP sparsity in selected pathways.  Note this is currently implemented for a
+univariate phenotype only
+bPenalty = 'lasso' applies a lasso penalty on the genotype coefficient vector (i.e. no group
+or pathway selection), and in the current implementation, ensures a fixed number of SNPs 
+are selected at each subsample.  This can easily be changed by editing methods in lasso.py
+bPenalty = 'lasso_post_PsRRR' is for enforcing a second level of SNP sparsity, post a full
+PsRRR analysis, and should only be used with care (see 
+Silver, M., et al., Identification of gene pathways implicated in Alzheimer's disease 
+using longitudinal imaging phenotypes with sparse regression, NeuroImage (In Press)).
+
+self.aPenalty:
+Setting this to 'lasso' forces sparse selection of phenotypes by imposing a lasso penalty
+on the phenotype coefficient vector.  Currently the same lambda value is used for phenotype
+sparsity.
+
+# MISC
+self.balanced			- set to 'True' if balanced subsampling is required.  This arises
+						  for example in the case where we have quantitative trait information
+						  for cases and controls.  In this situation we want each N/2 subsample
+						  to have equal number of cases and controls, so that, for example, if 
+						  there are more cases than controls, controls are sampled more frequently
+						  than cases.  See getData.createSubsamp() for details.  Case/control 
+						  status of all subjects is encoded as 0/1 in a status file.  See
+						  self.STATUS_FILE in params file.
+self.verbose			- set to 'True' for verbose output
+						  Note - 'very' verbose output can be obtained by setting the following
+						  flags to 'True' in GL.glBCD() or SGL.CGD():
+						  showCDconvergence  - for CD within blocks
+self.generateNull		- set to 'True' to run full analysis, with permuted phenotypes.  This 
+						  is useful for investigating properties of the null distribution.
+						  showBCDconvergence - for BCD between blocks
+
+
+
+6. PARALLEL OPERATION ON A COMPUTING CLUSTER
+Parallel operation on a compute cluster using parallel python is achieved by setting 
+self.mode = 'pp', as described in the relevant section of docs/apating_weights.txt.

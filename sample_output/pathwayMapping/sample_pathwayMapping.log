@@ -1,0 +1,66 @@
+
+Mapping pathways to genes and genes to pathways...
+using /home/silverm/PsRRR/public/data/genePathways.map
+5021 unique genes mapped to  150 pathways
+
+Mapping genotyped SNPs to genes in pathways database, and vice versa...
+23731 gene locations extracted from /home/silverm/PsRRR/public/data/genePos_GRCh37p3.csv
+4000 SNP locations extracted from /home/silverm/PsRRR/public/data/sample.bim
+mapping SNPs to genes (this may take some time)...
+2644 SNPs mapped to 292 genes in pathways database
+1356 not mapped to any gene
+
+Mapping SNPs to pathways, and vice versa...
+591 SNPs mapped to 77 pathways
+2053 SNPs not mapped to any pathway
+SNPs map to max: 22 and min: 1 pathways
+pathways map to max: 89 and min: 1 SNPs
+
+Applying filtering...
+25 pathways with less than 10 SNPs removed
+13 duplicate pathways with identical SNPs removed; one representative pathway retained for all duplicate pathways
+list of representative and duplicate pathways will be saved to file
+39 pathways mapped to 536 SNPs after filtering
+
+* pathway to SNP mapping completed *
+saving pathway -> snp map to file: /home/silverm/PsRRR/public/sample_output/pathwayMapping/sample_pathways_SNP_mapping.txt
+
+Creating filtered snp to gene mappings...
+removing SNPs not mapped to pathways
+filtered snpGeneMap with 536 SNPs created ( 2108 SNPs removed)
+removing genes not mapped to pathways
+156 genes removed from snpGeneMap
+62 genes that map to genotyped SNPs and pathways remain
+filtered GeneSnpMap with 62 genes created
+
+
+-----------------------------------------
+Updating PLINK files and creating design matrix...
+
+Updating PLINK files to include only mapped SNPs
+(see /home/silverm/PsRRR/public/sample_output/pathwayMapping/sample_mappedSNPsOnly.log)
+recoding PLINK file to minor allele dosage
+genotype file recoded and saved as  /home/silverm/PsRRR/public/sample_output/pathwayMapping/sample_mappedSNPsOnly_recoded.raw
+Generating genotype design matrix for mapped SNPs only...
+(400, 536) design matrix generated for 400 subjects and 536 SNPs
+
+* genotype file processing completed *
+Creating pathway -> SNP maps with pathway and SNP names replaced by indices
+indices correspond to columns in design matrix...
+
+pathway name -> pathway index map created
+unexpanded pathway -> SNP map with SNP indices corresponding to columns in design matrix created
+SNPs expanded from 536 to  1213 SNPs
+expanded pathway -> SNP map created
+(536, 1213) matrix mapping SNP indices to indices in expanded variable space created
+
+
+-----------------------------------------
+Creating expanded design matrix...
+
+(400, 1213) Expanded design matrix created
+all phenotype, genotype and pathway mapping data saved to file
+
+final data structure required for analysis saved to:
+/home/silverm/PsRRR/public/sample_output/pathwayMapping/sample_dataFile.pickle
+all info saved to log file:  /home/silverm/PsRRR/public/sample_output/pathwayMapping/sample_pathwayMapping.log

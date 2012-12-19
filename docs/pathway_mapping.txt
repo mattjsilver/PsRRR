@@ -1,0 +1,116 @@
+PATHWAYS SPARSE REDUCED-RANK REGRESSION
+
+Distributed under GNU general public licence (see COPYRIGHT.txt) 
+Copyright (C) 2012 Matt Silver
+
+WARRANTY DISCLAIMER
+Please note there is no warranty for the program, to the extent permitted by applicable law.
+Except when otherwise stated in writing the copyright holders and/or other parties provide the program
+“as is” without warranty of any kind, either expressed or implied, including, but not limited to, 
+the implied warranties of merchantability and fitness for a particular purpose. The entire risk
+as to the quality and performance of the program is with you. Should the program
+prove defective, you assume the cost of all necessary servicing, repair or correction.
+
+Please send comments or bugs to g.montana@imperial.ac.uk
+
+If you use PsRRR in a published paper, please cite at least one of the following 2 papers:
+
+PATHWAYS ANALYSIS WITH UNIVARIATE Y
+Silver, Matt, and Montana, G. “Fast Identification of Biological Pathways Associated with
+a Quantitative Trait Using Group Lasso with Overlaps.” 
+Statistical Applications in Genetics and Molecular Biology 11, no. 1 (2012).
+
+PATHWAYS ANALYSIS WITH MULTIVARIATE Y
+Silver, Matt, Eva Janousova, Xue Hua, Paul M. Thompson, and Giovanni Montana. 
+“Identification of Gene Pathways Implicated in Alzheimer’s Disease Using Longitudinal 
+Imaging Phenotypes with Sparse Regression.” 
+NeuroImage 63, no. 3 (2012)
+******************************************************************************************
+
+
+PROCEDURE FOR MAPPING SNPS TO PATHWAY MAPPING
+
+1. REQUIRED SOURCE FILES
+
+i. pathway or gene set file
+
+White space delimited file.  Each line starts with pathway name, followed by a list of
+genes mapping to that pathway (see data/genePathways.map for example).
+
+ii. gene position file
+
+Comma delimited (csv) file, with the following header:
+
+Gene Start (bp), Gene End (bp), Chromosome Name, HGNC symbol,
+
+(See genePos_GRCh37p3.csv for example.  This was downloaded from www.biomart.org).
+
+** Note, gene locations must correspond to genome build of genotype file, to ensure that 
+SNP/gene coordinates are aligned.  Also gene symbols must follow same convention as pathway
+or gene set file (e.g. use HGNC gene symbols) **
+
+iii. genotype files in PLINK bed/bim/fam format (see http://pngu.mgh.harvard.edu/~purcell/plink/)
+
+
+
+2. RUNNING THE CODE
+
+i. ensure that the program directory structure is as described in README.txt
+
+ii. the program requires a paramater file containing file locations, program parameters
+etc.  This must be located in the params directory.  The name of the params file must be
+passed as an argument to program.  E.g. to run SNP to pathway mapping using the test data
+provided, do the following:
+
+	a. cd to the src/preprocessData/ directory
+	b. type the following command at the prompt
+		
+		~/src/preprocessData> python mapSNPsToPathways.py PsRRR_params_test
+
+To use your own data, amend the parameter file accordingly, and save it to a different name.
+Then run the program with the new param file name as the sole argument.
+
+iii. all files generated during the pathway mapping process will appear in the output 
+directory specified in the params file.
+
+iv. look carefully for any errors or warnings in the pathway mapping log file (see below).
+
+
+
+3. OUTPUT FILES with test data provided (should be found in ~/sample_output/pathwayMapping
+after running mapSNPsToPathways.py as directed above).
+
+('sample' will be replaced by PLINK filename when running with user data)
+
+sample_pathwayMapping.log	- log file detailing SNP to pathway mapping process 
+
+sample_dataFile.pickle		- pickled file containing all genotype and pathway mapping data
+							  required for PsRRR analysis (expanded and unexpanded genotype
+							  minor allele count matrices (X, eX);  SNP to pathway mappings 
+							  and information to trace SNPs and pathways back to their rsIDs, 
+							  pathway names etc
+sample_geneSNPs.pickle		- pre and post pathway mapping gene -> SNP and SNP -> gene maps, plus
+							  other information relevant to snp <-> gene mapping process
+sample_genotypes.pickle		- expanded and unexpanded genotype matrices, plus SNP idx to 
+							  SNP RSid mappings
+sample_pathwayMapping.pickle 			- detailed info on pathways <-> SNP mapping process
+
+sample_unfilteredPathwayGenes.pickle 	- pathway -> gene and gene -> pathway maps, pre-SNP ->
+										  pathway mapping, i.e. including genes and pathways
+										  that may not map to SNPs in dataset
+
+sample_mappedSNPs.txt		- textfile list of SNPs that map to pathways
+
+sample_pathways_SNP_mapping.txt			-  text file of pathway -> SNP RSid mappings
+
+PLINK files - recoded to minor allele counts:
+sample_mappedSNPsOnly_recoded.log
+sample_mappedSNPsOnly_recoded.nosex
+sample_mappedSNPsOnly_recoded.raw
+
+PLINK files corresponding to mapped SNPs only:
+sample_mappedSNPsOnly.bed
+sample_mappedSNPsOnly.bim
+sample_mappedSNPsOnly.fam
+sample_mappedSNPsOnly.log
+sample_mappedSNPsOnly.nosex

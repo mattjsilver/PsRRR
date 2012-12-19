@@ -1,0 +1,50 @@
+
+@----------------------------------------------------------@
+|        PLINK!       |     v1.07      |   10/Aug/2009     |
+|----------------------------------------------------------|
+|  (C) 2009 Shaun Purcell, GNU General Public License, v2  |
+|----------------------------------------------------------|
+|  For documentation, citation & bug-report instructions:  |
+|        http://pngu.mgh.harvard.edu/purcell/plink/        |
+@----------------------------------------------------------@
+
+Skipping web check... [ --noweb ] 
+Writing this text to log file [ /home/silverm/PsRRR/public/sample_output/pathwayMapping/sample_mappedSNPsOnly.log ]
+Analysis started: Thu Aug 23 09:39:46 2012
+
+Options in effect:
+	--bfile /home/silverm/PsRRR/public/data/sample
+	--extract /home/silverm/PsRRR/public/sample_output/pathwayMapping/sample_mappedSNPs.txt
+	--make-bed
+	--out /home/silverm/PsRRR/public/sample_output/pathwayMapping/sample_mappedSNPsOnly
+	--noweb
+
+Reading map (extended format) from [ /home/silverm/PsRRR/public/data/sample.bim ] 
+4000 markers to be included from [ /home/silverm/PsRRR/public/data/sample.bim ]
+Reading pedigree information from [ /home/silverm/PsRRR/public/data/sample.fam ] 
+400 individuals read from [ /home/silverm/PsRRR/public/data/sample.fam ] 
+0 individuals with nonmissing phenotypes
+Assuming a disease phenotype (1=unaff, 2=aff, 0=miss)
+Missing phenotype value is also -9
+0 cases, 0 controls and 400 missing
+0 males, 0 females, and 400 of unspecified sex
+Warning, found 400 individuals with ambiguous sex codes
+Writing list of these individuals to [ /home/silverm/PsRRR/public/sample_output/pathwayMapping/sample_mappedSNPsOnly.nosex ]
+Reading genotype bitfile from [ /home/silverm/PsRRR/public/data/sample.bed ] 
+Detected that binary PED file is v1.00 SNP-major mode
+Reading list of SNPs to extract [ /home/silverm/PsRRR/public/sample_output/pathwayMapping/sample_mappedSNPs.txt ] ... 536 read
+Before frequency and genotyping pruning, there are 536 SNPs
+400 founders and 0 non-founders found
+Total genotyping rate in remaining individuals is 1
+0 SNPs failed missingness test ( GENO > 1 )
+0 SNPs failed frequency test ( MAF < 0 )
+After frequency and genotyping pruning, there are 536 SNPs
+After filtering, 0 cases, 0 controls and 400 missing
+After filtering, 0 males, 0 females, and 400 of unspecified sex
+Writing pedigree information to [ /home/silverm/PsRRR/public/sample_output/pathwayMapping/sample_mappedSNPsOnly.fam ] 
+Writing map (extended format) information to [ /home/silverm/PsRRR/public/sample_output/pathwayMapping/sample_mappedSNPsOnly.bim ] 
+Writing genotype bitfile to [ /home/silverm/PsRRR/public/sample_output/pathwayMapping/sample_mappedSNPsOnly.bed ] 
+Using (default) SNP-major mode
+
+Analysis finished: Thu Aug 23 09:39:46 2012
+

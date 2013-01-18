@@ -1,0 +1,2 @@
+This project is from Matt Silver and contains some of his code he developed during his Phd. I met with him as an external examiner for his vivo, and I suggested that he could share this on github. He kindly agreed - and I'm sure at some stage the project will be moved to his (future) github home. Meanwhile, this allows those interested to have a look / contribute. Please contact Matt if there's interest.
+JB

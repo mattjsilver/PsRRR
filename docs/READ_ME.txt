@@ -11,7 +11,7 @@ the implied warranties of merchantability and fitness for a particular purpose. 
 as to the quality and performance of the program is with you. Should the program
 prove defective, you assume the cost of all necessary servicing, repair or correction.
 
-Please send comments or bugs to g.montana@imperial.ac.uk
+Please send comments or bugs to matt.silver@lshtm.ac.uk
 
 If you use PsRRR in a published paper, please cite at least one of the following 2 papers:
 
